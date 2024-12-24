@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STL Vertices and Normals Table</title>
+</head>
+<body>
+
+<h2>STL Vertices Table</h2>
+<input type="file" id="stlFileInput" />
+<table id="verticesTable" border="1">
+  <thead>
+    <tr>
+      <th>X</th>
+      <th>Y</th>
+      <th>Z</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Rows will be added here -->
+  </tbody>
+</table>
+
+<h2>STL Normals Table</h2>
+<table id="normalsTable" border="1">
+  <thead>
+    <tr>
+      <th>Normal X</th>
+      <th>Normal Y</th>
+      <th>Normal Z</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Rows will be added here -->
+  </tbody>
+</table>
+
+<script>
+  document.getElementById("stlFileInput").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const contents = e.target.result;
+        const triangleCount = displayVertices(contents);
+        displayNormals(contents, triangleCount);
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  function displayVertices(stlData) {
+    const tbody = document.getElementById("verticesTable").querySelector("tbody");
+    tbody.innerHTML = ""; // Clear any previous rows
+
+    const vertexRegex = /^\s*vertex\s+([-+]?\d*\.?\d+)\s+([-+]?\d*\.?\d+)\s+([-+]?\d*\.?\d+)/gm;
+    let match;
+    let rowCount = 0;
+
+    while ((match = vertexRegex.exec(stlData)) !== null) {
+      const x = parseFloat(match[1]);
+      const y = parseFloat(match[2]);
+      const z = parseFloat(match[3]);
+
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${x}</td><td>${y}</td><td>${z}</td>`;
+      tbody.appendChild(row);
+
+      rowCount++;
+    }
+
+    // Each triangle has 3 vertices
+    return rowCount / 3;
+  }
+
+  function displayNormals(stlData, triangleCount) {
+    const tbody = document.getElementById("normalsTable").querySelector("tbody");
+    tbody.innerHTML = ""; // Clear any previous rows
+
+    const normalRegex = /^\s*facet normal\s+([-+]?\d*\.?\d+)\s+([-+]?\d*\.?\d+)\s+([-+]?\d*\.?\d+)/gm;
+    let match;
+    let rowCount = 0;
+
+    while ((match = normalRegex.exec(stlData)) !== null && rowCount < triangleCount) {
+      const nx = parseFloat(match[1]);
+      const ny = parseFloat(match[2]);
+      const nz = parseFloat(match[3]);
+
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${nx}</td><td>${ny}</td><td>${nz}</td>`;
+      tbody.appendChild(row);
+
+      rowCount++;
+    }
+  }
+</script>
+
+</body>
+</html>
